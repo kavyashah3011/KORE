@@ -1,8 +1,10 @@
 # KORE — Multi-Agent Collaboration Pipeline
 
-> **An intelligent multi-agent system that researches topics, creates strategic plans, executes tasks, and reviews quality using Claude AI**
+> **An intelligent multi-agent system that researches topics, creates strategic plans, executes tasks, and reviews quality using FREE Ollama AI**
 
-**Stack:** Claude (reasoning) · CrewAI (orchestration) · LangChain (tools) · DuckDuckGo (web search)
+**Stack:** Ollama (free local AI) · CrewAI (orchestration) · LangChain (tools) · DuckDuckGo (web search)
+
+✅ **COMPLETELY FREE - No API costs!**
 
 ---
 
@@ -10,17 +12,19 @@
 
 1. [What is KORE?](#what-is-kore)
 2. [System Requirements](#system-requirements)
-3. [Complete Folder Structure](#complete-folder-structure)
-4. [File Descriptions](#file-descriptions)
-5. [Installation & Setup](#installation--setup)
-6. [Configuration Details](#configuration-details)
-7. [How Agents Work](#how-agents-work)
-8. [Running KORE](#running-kore)
-9. [Understanding Outputs](#understanding-outputs)
-10. [Customization Guide](#customization-guide)
-11. [Testing](#testing)
-12. [Troubleshooting](#troubleshooting)
-13. [Command Reference](#command-reference)
+3. [FREE LLM Options & Setup](#free-llm-options--setup)
+4. [Quick Start (5 minutes)](#quick-start-5-minutes)
+5. [Complete Folder Structure](#complete-folder-structure)
+6. [File Descriptions](#file-descriptions)
+7. [Detailed Installation & Setup](#detailed-installation--setup)
+8. [Configuration Details](#configuration-details)
+9. [How Agents Work](#how-agents-work)
+10. [Running KORE](#running-kore)
+11. [Understanding Outputs](#understanding-outputs)
+12. [Customization Guide](#customization-guide)
+13. [Testing](#testing)
+14. [Troubleshooting](#troubleshooting)
+15. [Command Reference](#command-reference)
 
 ---
 
@@ -33,18 +37,178 @@ KORE is a **multi-agent AI system** that breaks down complex goals into structur
 3. ⚙️ **Executor** - Implements the plan and produces deliverables  
 4. ✅ **Reviewer** - Audits quality and scores the entire output
 
-Each agent uses **Claude AI** for reasoning and passes context to the next agent, creating an intelligent pipeline that handles research-to-execution workflows.
+Each agent uses **free Ollama or Groq AI** for reasoning and passes context to the next agent, creating an intelligent pipeline that handles research-to-execution workflows.
 
 ---
 
 ## System Requirements
 
 - **Python**: 3.10 or higher
-- **API**: Anthropic Claude API key (get at https://console.anthropic.com)
+- **Ollama** OR **Groq API**: Free local/cloud AI (choose one below)
+- **RAM**: 4GB+ (Groq needs less, Ollama needs more)
+- **GPU**: Optional but recommended for faster inference
 - **OS**: Windows, macOS, or Linux
-- **Internet**: Required for web search and API calls
+- **Internet**: Required for web search (Groq also needs internet for API)
 
 ---
+
+## FREE LLM Options & Setup
+
+**KORE is 100% free!** Choose between two options:
+
+### 🎯 Quick Decision Table
+
+| I want... | Use | Setup Time | Cost |
+|-----------|-----|-----------|------|
+| **Complete free, unlimited** | Ollama | 10 min | $0 |
+| **No installation, fast** | Groq | 2 min | $0 |
+| **Works offline** | Ollama | 10 min | $0 |
+| **Minimal RAM needed** | Groq | 2 min | $0 |
+| **Maximum privacy** | Ollama | 10 min | $0 |
+
+---
+
+### Option 1: OLLAMA (Recommended - Completely Free & Unlimited)
+
+**Best for:** Learning, unlimited usage, offline work, privacy
+
+#### ✅ Install Ollama (3 minutes)
+
+**Download:** https://ollama.ai
+
+- **Windows**: Download installer → Run → Install
+- **macOS**: `brew install ollama` or download DMG
+- **Linux**: `curl https://ollama.ai/install.sh | sh`
+
+**Verify:**
+```bash
+ollama --version
+```
+
+#### 📥 Download an AI Model
+
+**For Standard Computer (Recommended):**
+```powershell
+ollama pull mistral
+# Takes 5-10 minutes
+```
+
+**Choose model by your RAM:**
+
+| Model | Speed | Quality | RAM | Command |
+|-------|-------|---------|-----|---------|
+| **Mistral** ⭐ | Very Fast | Good | 4-8 GB | `ollama pull mistral` |
+| Llama 2 | Medium | Good | 8-16 GB | `ollama pull llama2` |
+| Neural Chat | Very Fast | Basic | 4 GB | `ollama pull neural-chat` |
+| Orca Mini | Lightning | Fair | 3 GB | `ollama pull orca-mini` |
+| Zephyr | Fast | Excellent | 8 GB | `ollama pull zephyr` |
+
+#### 🚀 Start Ollama Server
+
+**Keep this running in a terminal:**
+
+```powershell
+# Windows PowerShell
+ollama serve
+
+# Or install as Windows service (optional)
+ollama install
+```
+
+**Verify it's running:**
+```bash
+# Should return model info
+curl http://localhost:11434/api/tags
+```
+
+#### ✅ Configure KORE for Ollama
+
+**Edit `.env` file:**
+```env
+# Model you downloaded
+OLLAMA_MODEL=mistral
+
+# Server URL
+OLLAMA_BASE_URL=http://localhost:11434
+
+# Your goal
+KORE_GOAL=Create a business plan for a tech startup
+```
+
+---
+
+### Option 2: GROQ (Free Cloud API - Alternative)
+
+**Best for:** No installation, cloud-based, very fast
+
+#### ⚡ Setup Groq (2 minutes)
+
+**Step 1: Get Free API Key**
+
+1. Go to https://console.groq.com/keys
+2. Sign up with Google or GitHub
+3. Copy your API key
+4. No credit card needed! ✅
+
+**Step 2: Install Groq Package**
+
+```bash
+pip install langchain-groq
+```
+
+**Step 3: Configure KORE for Groq**
+
+**Edit `.env` file:**
+```env
+# Your free API key from groq.com
+GROQ_API_KEY=your-free-api-key-here
+
+# Model to use
+GROQ_MODEL=mixtral-8x7b-32768
+```
+
+**Available Groq Models:**
+- `mixtral-8x7b-32768` - Balanced (recommended)
+- `llama2-70b-4096` - Very powerful
+- `gemma-7b-it` - Lightweight
+
+**Step 4: Update agents/base.py**
+
+Replace the entire file with:
+
+```python
+from __future__ import annotations
+
+"""Shared LLM factory using free Groq API."""
+
+from langchain_groq import ChatGroq
+from config.settings import GROQ_API_KEY, GROQ_MODEL
+
+def make_llm(temperature: float = 0.2) -> ChatGroq:
+    """Return a configured Groq LLM instance (free API)."""
+    return ChatGroq(
+        model=GROQ_MODEL,
+        api_key=GROQ_API_KEY,
+        temperature=temperature,
+    )
+```
+
+---
+
+### ⚙️ Cost Comparison
+
+| Solution | Cost | Limit | Setup |
+|----------|------|-------|-------|
+| **Ollama** | 💰 $0 | Unlimited | 10 min |
+| **Groq** | 💰 $0 | 500 req/day | 2 min |
+| Claude API | ❌ $5-20/mo | Varies | 2 min |
+| ChatGPT API | ❌ $1-5/mo | Varies | 2 min |
+
+---
+
+## Quick Start (5 minutes)
+
+**Choose your LLM option above, then follow these 5 steps:**
 
 ## Complete Folder Structure
 
@@ -109,13 +273,13 @@ KORE-legend/
 
 | File | Purpose | Key Config |
 |------|---------|-----------|
-| `settings.py` | Central config source | `KORE_GOAL`, `CLAUDE_MODEL`, `BASE_DIR`, `LOGS_DIR`, `OUTPUTS_DIR` |
+| `settings.py` | Central config source | `KORE_GOAL`, `OLLAMA_MODEL`, `OLLAMA_BASE_URL`, `BASE_DIR`, `LOGS_DIR`, `OUTPUTS_DIR` |
 
 ### Agents Module (`agents/`)
 
 | File | Agent Role | Tools | Temperature |
 |------|-----------|-------|------------|
-| `base.py` | LLM factory | N/A | N/A |
+| `base.py` | LLM factory | N/A | N/A (uses Ollama) |
 | `researcher.py` | Research Specialist (gathers info) | Web search | 0.1 (conservative) |
 | `planner.py` | Strategic Planner (creates action plan) | None | 0.3 (balanced) |
 | `executor.py` | Execution Specialist (does the work) | File I/O | 0.1 (conservative) |
@@ -139,12 +303,11 @@ KORE-legend/
 
 ---
 
-## Installation & Setup
+## Detailed Installation & Setup
 
-### Step 1: Clone/Download Repository
+### Step 1: Clone/Setup KORE
 
 ```bash
-# Navigate to project directory
 cd KORE-legend
 ```
 
@@ -160,104 +323,204 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Step 3: Install Dependencies
+### Step 3: Install Python Dependencies
 
 ```bash
-# Install all required packages from requirements.txt
 pip install -r requirements.txt
 
-# Verify installation (should not error)
+# Verify installation
 pip list | grep crewai
 ```
 
-**What gets installed:**
+**Installed packages:**
 - `crewai` - Multi-agent orchestration
 - `langchain` - LLM framework
-- `langchain-anthropic` - Claude integration
-- `langchain-community` - DuckDuckGo search
-- `duckduckgo-search` - Web search library
-- `anthropic` - Anthropic API client
-- `python-dotenv` - Environment variable loading
+- `langchain-community` - Ollama integration
+- `duckduckgo-search` - Web search
+- `python-dotenv` - Environment variables
 - `pydantic` - Data validation
 - `rich` - Terminal formatting
-- `pytest` - Testing framework
+- `pytest` - Testing
 
-### Step 4: Get Anthropic API Key
-
-1. Go to [Anthropic Console](https://console.anthropic.com)
-2. Sign in or create account
-3. Navigate to **API Keys** section
-4. Create new API key and copy it
-5. **Never share this key publicly**
-
-### Step 5: Create `.env` File
+### Step 4: Create `.env` File
 
 ```bash
-# Copy the example file
+# Copy example file
 cp .env.example .env
-
-# Open .env and add your API key:
 ```
 
-**`.env` file contents:**
+**For Ollama, edit `.env`:**
 ```env
-# Required: Your Anthropic Claude API key
-ANTHROPIC_API_KEY=sk-ant-v5-your-actual-key-here-1234567890abcdef
-
-# Optional: Override the Claude model (defaults to claude-sonnet-4-20250514)
-CLAUDE_MODEL=claude-sonnet-4-20250514
-
-# Optional: Set your goal (can also override with env var at runtime)
-KORE_GOAL=Research the current state of AI agent frameworks in 2025, create an actionable adoption plan for a mid-sized tech startup, and produce a quality-reviewed final report.
-
-# Optional: Temperature settings (affects randomness of responses)
-CLAUDE_TEMP_LOW=0.1
-CLAUDE_TEMP_MED=0.3
+OLLAMA_MODEL=mistral
+OLLAMA_BASE_URL=http://localhost:11434
+KORE_GOAL=Your goal here
 ```
+
+**For Groq, edit `.env`:**
+```env
+GROQ_API_KEY=your-free-key-from-groq
+GROQ_MODEL=mixtral-8x7b-32768
+KORE_GOAL=Your goal here
+```
+
+### Step 5: Start LLM Server (Ollama only)
+
+**If using Ollama, keep this terminal open:**
+
+```powershell
+ollama serve
+```
+
+**If using Groq, skip this step** (cloud-based, no local server)
+
+### Step 6: Run KORE!
+
+```powershell
+.\venv\Scripts\Activate.ps1
+python main.py
+```
+
+**Expected output:**
+```
+[KORE banner displays]
+🎯 Goal: Your goal here...
+[Agents run: Researcher → Planner → Executor → Reviewer]
+[Files saved to outputs/ and logs/]
+═════════════════════════════════════════
+✅ KORE Pipeline Complete
+═════════════════════════════════════════
+```
+
+---
+
+## Installation & Setup
 
 ---
 
 ## Configuration Details
 
-### What Each Setting Does
+### Ollama Configuration
 
 **In `config/settings.py`:**
 
 ```python
-# Goal for the pipeline (what agents will work on)
-KORE_GOAL: str = os.getenv("KORE_GOAL", "default goal here")
+# Model to use from Ollama (downloaded via ollama pull)
+OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral")
 
-# Claude model to use (check Anthropic docs for latest)
-CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-20250514")
+# Ollama server URL (default: localhost:11434)
+OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 # Temperature: Lower = more focused, Higher = more creative
-CLAUDE_TEMP_LOW = 0.1      # Research & Execution (factual)
-CLAUDE_TEMP_MED = 0.3      # Planning & Review (balanced)
+OLLAMA_TEMP_LOW = 0.1      # Research & Execution (factual)
+OLLAMA_TEMP_MED = 0.3      # Planning & Review (balanced)
 
-# Directories for outputs and logs (auto-created)
+# Goal for the pipeline
+KORE_GOAL: str = os.getenv("KORE_GOAL", "default goal here")
+
+# Directories
 BASE_DIR    = project root
 LOGS_DIR    = ./logs/       (execution logs)
 OUTPUTS_DIR = ./outputs/    (generated files)
 ```
 
+**In `.env` file:**
+```env
+OLLAMA_MODEL=mistral
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_TEMP_LOW=0.1
+OLLAMA_TEMP_MED=0.3
+KORE_GOAL=Your goal here
+```
+
+### Groq Configuration
+
+**In `config/settings.py`:**
+
+```python
+# Groq API Key (get free from https://console.groq.com/keys)
+GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+
+# Groq model to use
+GROQ_MODEL: str = os.getenv("GROQ_MODEL", "mixtral-8x7b-32768")
+
+# Temperature: Lower = more focused, Higher = more creative
+GROQ_TEMP: float = float(os.getenv("GROQ_TEMP", "0.2"))
+
+# Goal for the pipeline
+KORE_GOAL: str = os.getenv("KORE_GOAL", "default goal here")
+```
+
+**In `.env` file:**
+```env
+GROQ_API_KEY=your-free-key-from-groq.com
+GROQ_MODEL=mixtral-8x7b-32768
+GROQ_TEMP=0.2
+KORE_GOAL=Your goal here
+```
+
 ### Override Goal at Runtime
 
-**Option 1: Command Line (Windows PowerShell)**
+**Windows PowerShell (Ollama):**
 ```powershell
-$env:KORE_GOAL="Build a data pipeline for real-time analytics"
+.\venv\Scripts\Activate.ps1
+$env:KORE_GOAL="Design a mobile app for remote team management"
 python main.py
 ```
 
-**Option 2: Command Line (Linux/macOS)**
+**Windows PowerShell (Groq):**
+```powershell
+.\venv\Scripts\Activate.ps1
+$env:GROQ_API_KEY="your-key-here"
+$env:KORE_GOAL="Design a mobile app for remote team management"
+python main.py
+```
+
+**Linux/macOS (Ollama):**
 ```bash
-export KORE_GOAL="Build a data pipeline for real-time analytics"
+source venv/bin/activate
+export KORE_GOAL="Design a mobile app for remote team management"
 python main.py
 ```
 
-**Option 3: Edit `.env` file**
-```env
-KORE_GOAL=Your custom goal here
+**Linux/macOS (Groq):**
+```bash
+source venv/bin/activate
+export GROQ_API_KEY="your-key-here"
+export KORE_GOAL="Design a mobile app for remote team management"
+python main.py
 ```
+
+### Change Ollama Model
+
+**Download different model:**
+```bash
+ollama pull llama2
+ollama pull zephyr
+ollama pull neural-chat
+```
+
+**Update `.env`:**
+```env
+OLLAMA_MODEL=llama2
+```
+
+### Troubleshooting LLM Issues
+
+**Ollama: "Connection refused"**
+- Make sure Ollama server is running: `ollama serve`
+- Check it's accessible: `curl http://localhost:11434/api/tags`
+
+**Ollama: "Out of memory"**
+- Use smaller model: `ollama pull orca-mini`
+- Close other applications
+
+**Groq: "API key invalid"**
+- Get new key from https://console.groq.com/keys
+- Make sure key is in `.env` without quotes
+
+**Groq: "Rate limit exceeded"**
+- Free tier has 500 requests/day limit
+- Wait for daily reset or upgrade plan
 
 ---
 
